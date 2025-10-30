@@ -11,6 +11,10 @@
 - [ ] Content scraping and trend analysis
 - [x] Dashboard for monitoring and control
 - [ ] Analytics and performance tracking
+- [x] Follower analytics page showing follow requests and target accounts
+- [x] Display generated images with scheduled posts in dashboard
+- [x] Show full hashtag list with each post preview
+- [x] Create dedicated "Scheduled Posts" page with all queued posts
 - [ ] Manual post creation and editing
 - [ ] Settings page for configuration
 - [x] Pause/resume automation controls

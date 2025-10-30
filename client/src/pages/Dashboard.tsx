@@ -176,10 +176,12 @@ export default function Dashboard() {
           <CardContent>
             {posts && posts.length > 0 ? (
               <div className="space-y-4">
-                {posts.slice(0, 5).map((post) => (
-                  <div key={post.id} className="flex items-start gap-4 border-b pb-4 last:border-0">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
+                {posts.slice(0, 5).map((post) => {
+                  const hashtags = post.hashtags ? JSON.parse(post.hashtags) : [];
+                  
+                  return (
+                    <div key={post.id} className="border rounded-lg p-4 space-y-3">
+                      <div className="flex items-center justify-between">
                         <span
                           className={`text-xs px-2 py-1 rounded ${
                             post.status === "posted"
@@ -195,19 +197,48 @@ export default function Dashboard() {
                         </span>
                         <span className="text-xs text-muted-foreground">
                           {post.scheduledFor
-                            ? new Date(post.scheduledFor).toLocaleString()
+                            ? new Date(post.scheduledFor).toLocaleString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                hour: 'numeric',
+                                minute: '2-digit',
+                              })
                             : "No schedule"}
                         </span>
                       </div>
-                      <p className="text-sm line-clamp-2">{post.content}</p>
-                      {post.hashtags && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {JSON.parse(post.hashtags).slice(0, 5).join(" ")}
-                        </p>
+                      
+                      {post.imageUrl && (
+                        <div className="rounded-lg overflow-hidden bg-muted">
+                          <img
+                            src={post.imageUrl}
+                            alt="Post preview"
+                            className="w-full h-48 object-cover"
+                          />
+                        </div>
+                      )}
+                      
+                      <p className="text-sm line-clamp-3">{post.content}</p>
+                      
+                      {hashtags.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {hashtags.slice(0, 5).map((tag: string, idx: number) => (
+                            <span
+                              key={idx}
+                              className="text-xs px-2 py-1 rounded bg-primary/10 text-primary"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                          {hashtags.length > 5 && (
+                            <span className="text-xs px-2 py-1 text-muted-foreground">
+                              +{hashtags.length - 5}
+                            </span>
+                          )}
+                        </div>
                       )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">No posts yet. Generate your first post!</p>

@@ -4,6 +4,23 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
 
+// Helper function to generate image prompts
+function generateImagePrompt(caption: string, topic: string): string {
+  const keywords = caption.toLowerCase();
+  
+  if (keywords.includes('saf') || keywords.includes('aviation')) {
+    return 'Modern sustainable aviation fuel facility with aircraft in background, clean energy infrastructure, professional photography, bright and optimistic, high quality';
+  } else if (keywords.includes('bamboo') || keywords.includes('biomass')) {
+    return 'Lush bamboo forest with bioenergy processing facility, sustainable agriculture, green technology, professional photography, vibrant and natural';
+  } else if (keywords.includes('solar') || keywords.includes('renewable')) {
+    return 'Solar panels and wind turbines in Australian landscape, renewable energy infrastructure, clean and modern, golden hour lighting';
+  } else if (keywords.includes('battery') || keywords.includes('graphite')) {
+    return 'High-tech battery manufacturing facility, advanced materials science, innovation and technology, futuristic and clean';
+  }
+  
+  return 'Sustainable energy infrastructure in Australia, clean technology, modern and professional photography, bright and optimistic, inspiring future';
+}
+
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
   system: systemRouter,
@@ -55,6 +72,18 @@ export const appRouter = router({
     getActivity: protectedProcedure.query(async () => {
       const { getRecentActivity } = await import("./automationDb");
       return await getRecentActivity(100);
+    }),
+
+    // Get followed accounts with details
+    getFollowedAccounts: protectedProcedure.query(async () => {
+      const { getActiveInstagramAccount, getFollowedAccounts } = await import("./automationDb");
+      
+      const account = await getActiveInstagramAccount();
+      if (!account) {
+        return [];
+      }
+      
+      return await getFollowedAccounts(account.id, 100);
     }),
 
     // Toggle automation on/off
@@ -144,6 +173,12 @@ export const appRouter = router({
         const messageContent = response.choices[0].message.content;
         const caption = typeof messageContent === 'string' ? messageContent : JSON.stringify(messageContent);
         
+        // Generate image for the post
+        const imagePrompt = generateImagePrompt(caption, topic);
+        const { generateImage } = await import("./_core/imageGeneration");
+        const imageResult = await generateImage({ prompt: imagePrompt });
+        const imageUrl = imageResult.url || null;
+        
         // Select hashtags
         const allHashtags = [
           "#SustainableAviationFuel", "#SAF", "#CleanAviation", "#bioenergy",
@@ -158,6 +193,7 @@ export const appRouter = router({
           accountId: account.id,
           content: caption,
           hashtags: JSON.stringify(selectedHashtags),
+          imageUrl,
           status: "scheduled",
           scheduledFor,
         });
@@ -167,6 +203,7 @@ export const appRouter = router({
           postId,
           caption,
           hashtags: selectedHashtags,
+          imageUrl,
           scheduledFor,
         };
       }),
