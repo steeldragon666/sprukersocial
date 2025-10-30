@@ -4,9 +4,9 @@
 - [x] Database schema for posts, scheduled posts, followed accounts, and analytics
 - [x] Instagram authentication and session management
 - [x] AI content generation using Claude API
-- [ ] Image generation for posts
-- [ ] Automated posting with randomized scheduling
-- [ ] Follower growth automation (follow aligned accounts)
+- [x] Image generation for posts
+- [x] Automated posting with randomized scheduling
+- [x] Follower growth automation (follow aligned accounts)
 - [x] Hashtag management system
 - [ ] Content scraping and trend analysis
 - [x] Dashboard for monitoring and control
@@ -15,3 +15,20 @@
 - [ ] Settings page for configuration
 - [x] Pause/resume automation controls
 - [x] Post history and logs
+
+## Deployment
+- [ ] Test post generation with real Instagram account
+- [ ] Verify image generation works correctly
+- [ ] Test scheduler with multiple posts
+- [ ] Deploy to production
+- [ ] Configure domain (optional)
+
+## Future Enhancements
+- [ ] Analytics dashboard with engagement metrics
+- [ ] Content scraping from trending accounts
+- [ ] Manual post editing interface
+- [ ] Advanced scheduling controls (time windows, frequency adjustment)
+- [ ] Multi-account support
+- [ ] Instagram Stories automation
+- [ ] Hashtag performance tracking
+- [ ] A/B testing for post content
