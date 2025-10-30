@@ -1,0 +1,18 @@
+{
+  "query": "SELECT id, status, scheduled_for, created_at, posted_at, error_message FROM posts ORDER BY id DESC LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4FiUfikgDQU4MHP.4fff9066d80d --database U34NkkLJbrpbDaDFLXHvpq --execute SELECT id, status, scheduled_for, created_at, posted_at, error_message FROM posts ORDER BY id DESC LIMIT 1;",
+  "rows": [
+    {
+      "id": "8",
+      "status": "failed",
+      "scheduled_for": "2025-10-30 07:36:19",
+      "created_at": "2025-10-30 07:36:19",
+      "posted_at": "NULL",
+      "error_message": "require is not defined"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tstatus\tscheduled_for\tcreated_at\tposted_at\terror_message\n8\tfailed\t2025-10-30 07:36:19\t2025-10-30 07:36:19\tNULL\trequire is not defined\n",
+  "stderr": "",
+  "execution_time_ms": 1546
+}

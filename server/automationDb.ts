@@ -121,6 +121,10 @@ export async function updatePostStatus(
     postedAt: Date;
     instagramMediaId: string;
     errorMessage: string;
+    scheduledFor: Date;
+    content: string;
+    hashtags: string;
+    imageUrl: string;
   }> = {}
 ) {
   const db = await getDb();

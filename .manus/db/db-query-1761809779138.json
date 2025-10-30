@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO posts (account_id, content, hashtags, status, scheduled_for, created_at) \nVALUES (\n  1, \n  'Testing PowerPlant Energy Instagram automation! 🌱✈️\\n\\nSustainable Aviation Fuel (SAF) is revolutionizing air travel by reducing carbon emissions by up to 80% compared to traditional jet fuel. PowerPlant Energy is at the forefront of this transformation, developing innovative bamboo-based SAF solutions.\\n\\nJoin us in building a cleaner future for aviation. What role do you think SAF will play in achieving net-zero emissions?',\n  '[\"#SustainableAviationFuel\", \"#SAF\", \"#CleanAviation\", \"#bioenergy\", \"#renewableenergy\", \"#climateaction\", \"#PowerPlantEnergy\", \"#GreenTech\", \"#NetZero\", \"#SustainableFuture\"]',\n  'scheduled',\n  NOW(),\n  NOW()\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4FiUfikgDQU4MHP.4fff9066d80d --database U34NkkLJbrpbDaDFLXHvpq --execute INSERT INTO posts (account_id, content, hashtags, status, scheduled_for, created_at) \nVALUES (\n  1, \n  'Testing PowerPlant Energy Instagram automation! 🌱✈️\\n\\nSustainable Aviation Fuel (SAF) is revolutionizing air travel by reducing carbon emissions by up to 80% compared to traditional jet fuel. PowerPlant Energy is at the forefront of this transformation, developing innovative bamboo-based SAF solutions.\\n\\nJoin us in building a cleaner future for aviation. What role do you think SAF will play in achieving net-zero emissions?',\n  '[\"#SustainableAviationFuel\", \"#SAF\", \"#CleanAviation\", \"#bioenergy\", \"#renewableenergy\", \"#climateaction\", \"#PowerPlantEnergy\", \"#GreenTech\", \"#NetZero\", \"#SustainableFuture\"]',\n  'scheduled',\n  NOW(),\n  NOW()\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1615
+}

@@ -1,0 +1,16 @@
+{
+  "query": "SELECT id, username, is_active, last_post_at FROM instagram_accounts LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4FiUfikgDQU4MHP.4fff9066d80d --database U34NkkLJbrpbDaDFLXHvpq --execute SELECT id, username, is_active, last_post_at FROM instagram_accounts LIMIT 1;",
+  "rows": [
+    {
+      "id": "1",
+      "username": "powerplantenergy",
+      "is_active": "1",
+      "last_post_at": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tusername\tis_active\tlast_post_at\n1\tpowerplantenergy\t1\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 1537
+}

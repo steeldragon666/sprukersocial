@@ -129,6 +129,60 @@ export const appRouter = router({
         return { success: true };
       }),
 
+    // Post immediately (schedule for now)
+    postNow: protectedProcedure
+      .input(z.object({
+        postId: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        const { updatePostStatus } = await import("./automationDb");
+        
+        await updatePostStatus(input.postId, 'scheduled', {
+          scheduledFor: new Date(),
+        });
+        
+        return { success: true };
+      }),
+
+    // Update post content
+    updatePost: protectedProcedure
+      .input(z.object({
+        postId: z.number(),
+        content: z.string().optional(),
+        hashtags: z.array(z.string()).optional(),
+        scheduledFor: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { updatePostStatus } = await import("./automationDb");
+        
+        const updates: any = {};
+        if (input.content) updates.content = input.content;
+        if (input.hashtags) updates.hashtags = JSON.stringify(input.hashtags);
+        if (input.scheduledFor) updates.scheduledFor = new Date(input.scheduledFor);
+        
+        await updatePostStatus(input.postId, 'scheduled', updates);
+        
+        return { success: true };
+      }),
+
+    // Delete post
+    deletePost: protectedProcedure
+      .input(z.object({
+        postId: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        const { getDb } = await import("./db");
+        const { posts } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+        
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        
+        await db.delete(posts).where(eq(posts.id, input.postId));
+        
+        return { success: true };
+      }),
+
     // Generate and schedule a post
     generatePost: protectedProcedure
       .input(z.object({

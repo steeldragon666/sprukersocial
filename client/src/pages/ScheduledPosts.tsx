@@ -3,7 +3,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
-import { Calendar, Image as ImageIcon, Hash } from "lucide-react";
+import { Calendar, Image as ImageIcon, Hash, Clock, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -22,6 +22,26 @@ export default function ScheduledPosts() {
     onError: (error) => {
       toast.error(error.message);
       setIsGenerating(false);
+    },
+  });
+
+  const postNow = trpc.instagram.postNow.useMutation({
+    onSuccess: () => {
+      toast.success("Post scheduled to publish immediately!");
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const deletePost = trpc.instagram.deletePost.useMutation({
+    onSuccess: () => {
+      toast.success("Post deleted");
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 
@@ -159,6 +179,30 @@ export default function ScheduledPosts() {
                           ))}
                         </div>
                       )}
+
+                      {/* Action buttons */}
+                      <div className="flex gap-2 pt-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => postNow.mutate({ postId: post.id })}
+                        >
+                          <Clock className="mr-1 h-3 w-3" />
+                          Post Now
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            if (confirm('Delete this post?')) {
+                              deletePost.mutate({ postId: post.id });
+                            }
+                          }}
+                        >
+                          <Trash2 className="mr-1 h-3 w-3" />
+                          Delete
+                        </Button>
+                      </div>
                     </div>
                   );
                 })}

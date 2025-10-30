@@ -16,6 +16,8 @@
 - [x] Show full hashtag list with each post preview
 - [x] Create dedicated "Scheduled Posts" page with all queued posts
 - [ ] Manual post creation and editing
+- [x] "Post Now" button to schedule posts immediately
+- [ ] Edit post functionality to modify scheduled posts (delete implemented, edit dialog pending)
 - [ ] Settings page for configuration
 - [x] Pause/resume automation controls
 - [x] Post history and logs
