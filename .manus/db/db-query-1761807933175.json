@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO automation_settings (setting_key, setting_value) VALUES\n('posting_frequency', '15'),\n('follow_frequency', '10'),\n('max_posts_per_day', '100'),\n('max_follows_per_day', '500')\nON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4FiUfikgDQU4MHP.4fff9066d80d --database U34NkkLJbrpbDaDFLXHvpq --execute INSERT INTO automation_settings (setting_key, setting_value) VALUES\n('posting_frequency', '15'),\n('follow_frequency', '10'),\n('max_posts_per_day', '100'),\n('max_follows_per_day', '500')\nON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1627
+}

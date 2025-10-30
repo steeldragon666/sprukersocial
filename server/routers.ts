@@ -1,7 +1,8 @@
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
+import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
+import { z } from "zod";
 
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -17,12 +18,159 @@ export const appRouter = router({
     }),
   }),
 
-  // TODO: add feature routers here, e.g.
-  // todo: router({
-  //   list: protectedProcedure.query(({ ctx }) =>
-  //     db.getUserTodos(ctx.user.id)
-  //   ),
-  // }),
+  instagram: router({
+    // Get automation status and stats
+    getStatus: protectedProcedure.query(async () => {
+      const { getActiveInstagramAccount, getPostStats, getFollowStats, getAllSettings } = await import("./automationDb");
+      
+      const account = await getActiveInstagramAccount();
+      const postStats = await getPostStats();
+      const settings = await getAllSettings();
+      
+      let followStats = { total: 0, following: 0, unfollowed: 0 };
+      if (account) {
+        followStats = await getFollowStats(account.id);
+      }
+      
+      return {
+        account: account ? {
+          id: account.id,
+          username: account.username,
+          isActive: account.isActive === 1,
+          lastPostAt: account.lastPostAt,
+        } : null,
+        postStats,
+        followStats,
+        settings,
+      };
+    }),
+
+    // Get recent posts
+    getPosts: protectedProcedure.query(async () => {
+      const { getRecentPosts } = await import("./automationDb");
+      return await getRecentPosts(50);
+    }),
+
+    // Get activity logs
+    getActivity: protectedProcedure.query(async () => {
+      const { getRecentActivity } = await import("./automationDb");
+      return await getRecentActivity(100);
+    }),
+
+    // Toggle automation on/off
+    toggleAutomation: protectedProcedure
+      .input(z.object({ isActive: z.boolean() }))
+      .mutation(async ({ input }) => {
+        const { getActiveInstagramAccount, toggleAccountStatus } = await import("./automationDb");
+        
+        const account = await getActiveInstagramAccount();
+        if (!account) {
+          throw new Error("No Instagram account configured");
+        }
+        
+        await toggleAccountStatus(account.id, input.isActive);
+        
+        return { success: true };
+      }),
+
+    // Update automation settings
+    updateSettings: protectedProcedure
+      .input(z.object({
+        postingFrequency: z.string().optional(),
+        followFrequency: z.string().optional(),
+        maxPostsPerDay: z.string().optional(),
+        maxFollowsPerDay: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { setSetting } = await import("./automationDb");
+        
+        if (input.postingFrequency) {
+          await setSetting("posting_frequency", input.postingFrequency);
+        }
+        if (input.followFrequency) {
+          await setSetting("follow_frequency", input.followFrequency);
+        }
+        if (input.maxPostsPerDay) {
+          await setSetting("max_posts_per_day", input.maxPostsPerDay);
+        }
+        if (input.maxFollowsPerDay) {
+          await setSetting("max_follows_per_day", input.maxFollowsPerDay);
+        }
+        
+        return { success: true };
+      }),
+
+    // Generate and schedule a post
+    generatePost: protectedProcedure
+      .input(z.object({
+        topic: z.string().optional(),
+        scheduledFor: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { createPost } = await import("./automationDb");
+        const { getActiveInstagramAccount } = await import("./automationDb");
+        const { invokeLLM } = await import("./_core/llm");
+        
+        const account = await getActiveInstagramAccount();
+        if (!account) {
+          throw new Error("No Instagram account configured");
+        }
+        
+        // Content topics
+        const topics = [
+          "Sustainable Aviation Fuel (SAF) breakthroughs and industry adoption",
+          "Bioenergy policy updates in Australia and government initiatives",
+          "Renewable energy technology innovations and electrification advances",
+          "Low-carbon liquid fuels development and circular economy",
+          "Bamboo biomass conversion to SAF and graphite technologies",
+        ];
+        
+        const topic = input.topic || topics[Math.floor(Math.random() * topics.length)];
+        
+        // Generate content using Claude
+        const response = await invokeLLM({
+          messages: [
+            {
+              role: "system",
+              content: "You are a content creator for PowerPlant Energy, an Australian company focused on sustainable fuels, SAF, and bioenergy."
+            },
+            {
+              role: "user",
+              content: `Create an engaging Instagram post about: ${topic}\n\nRequirements:\n- Write 2-3 short paragraphs (max 200 words)\n- Include 1-2 key facts or statistics\n- Professional yet accessible tone\n- End with a call-to-action or thought-provoking question\n- DO NOT include hashtags in the caption (they will be added separately)\n\nFormat as plain text, no markdown.`
+            }
+          ]
+        });
+        
+        const messageContent = response.choices[0].message.content;
+        const caption = typeof messageContent === 'string' ? messageContent : JSON.stringify(messageContent);
+        
+        // Select hashtags
+        const allHashtags = [
+          "#SustainableAviationFuel", "#SAF", "#CleanAviation", "#bioenergy",
+          "#biomass", "#renewableenergy", "#cleanenergy", "#sustainability",
+          "#climateaction", "#energytransition", "#AustralianEnergy"
+        ];
+        const selectedHashtags = allHashtags.sort(() => 0.5 - Math.random()).slice(0, 12);
+        
+        const scheduledFor = input.scheduledFor ? new Date(input.scheduledFor) : new Date(Date.now() + 5 * 60 * 1000);
+        
+        const postId = await createPost({
+          accountId: account.id,
+          content: caption,
+          hashtags: JSON.stringify(selectedHashtags),
+          status: "scheduled",
+          scheduledFor,
+        });
+        
+        return {
+          success: true,
+          postId,
+          caption,
+          hashtags: selectedHashtags,
+          scheduledFor,
+        };
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;
