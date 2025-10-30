@@ -11,6 +11,10 @@ import {
 import { instagramService } from './instagramService';
 import { generateImage } from './_core/imageGeneration';
 import { ENV } from './_core/env';
+import https from 'https';
+import http from 'http';
+import fs from 'fs';
+import path from 'path';
 
 // Get Instagram credentials from environment
 const getInstagramCredentials = () => ({
@@ -281,11 +285,6 @@ class AutomationScheduler {
    * Download image from URL to temp file
    */
   private async downloadImage(url: string): Promise<string> {
-    const https = require('https');
-    const http = require('http');
-    const fs = require('fs');
-    const path = require('path');
-    
     const tempPath = path.join('/tmp', `instagram_${Date.now()}.jpg`);
     
     return new Promise((resolve, reject) => {

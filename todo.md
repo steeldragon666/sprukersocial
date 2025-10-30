@@ -20,6 +20,9 @@
 - [x] Pause/resume automation controls
 - [x] Post history and logs
 
+## Bugs
+- [x] Posts are failing - Fixed require() statements in scheduler (converted to ES6 imports)
+
 ## Deployment
 - [ ] Test post generation with real Instagram account
 - [ ] Verify image generation works correctly
