@@ -1,0 +1,45 @@
+{
+  "query": "SELECT id, action_type, action_details, status, created_at FROM activity_logs WHERE status = 'failed' ORDER BY created_at DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4FiUfikgDQU4MHP.4fff9066d80d --database U34NkkLJbrpbDaDFLXHvpq --execute SELECT id, action_type, action_details, status, created_at FROM activity_logs WHERE status = 'failed' ORDER BY created_at DESC LIMIT 5;",
+  "rows": [
+    {
+      "id": "8",
+      "action_type": "post",
+      "action_details": "{\"postId\":7}",
+      "status": "failed",
+      "created_at": "2025-10-30 07:42:00"
+    },
+    {
+      "id": "7",
+      "action_type": "post",
+      "action_details": "{\"postId\":7}",
+      "status": "failed",
+      "created_at": "2025-10-30 07:42:00"
+    },
+    {
+      "id": "6",
+      "action_type": "post",
+      "action_details": "{\"postId\":6}",
+      "status": "failed",
+      "created_at": "2025-10-30 07:40:00"
+    },
+    {
+      "id": "5",
+      "action_type": "post",
+      "action_details": "{\"postId\":5}",
+      "status": "failed",
+      "created_at": "2025-10-30 07:38:10"
+    },
+    {
+      "id": "4",
+      "action_type": "post",
+      "action_details": "{\"postId\":4}",
+      "status": "failed",
+      "created_at": "2025-10-30 07:38:05"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\taction_type\taction_details\tstatus\tcreated_at\n8\tpost\t{\"postId\":7}\tfailed\t2025-10-30 07:42:00\n7\tpost\t{\"postId\":7}\tfailed\t2025-10-30 07:42:00\n6\tpost\t{\"postId\":6}\tfailed\t2025-10-30 07:40:00\n5\tpost\t{\"postId\":5}\tfailed\t2025-10-30 07:38:10\n4\tpost\t{\"postId\":4}\tfailed\t2025-10-30 07:38:05\n",
+  "stderr": "",
+  "execution_time_ms": 1545
+}

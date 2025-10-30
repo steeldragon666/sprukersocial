@@ -1,0 +1,45 @@
+{
+  "query": "SELECT id, status, error_message, scheduled_for, created_at FROM posts WHERE status = 'failed' ORDER BY created_at DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4FiUfikgDQU4MHP.4fff9066d80d --database U34NkkLJbrpbDaDFLXHvpq --execute SELECT id, status, error_message, scheduled_for, created_at FROM posts WHERE status = 'failed' ORDER BY created_at DESC LIMIT 5;",
+  "rows": [
+    {
+      "id": "8",
+      "status": "failed",
+      "error_message": "require is not defined",
+      "scheduled_for": "2025-10-30 07:36:19",
+      "created_at": "2025-10-30 07:36:19"
+    },
+    {
+      "id": "7",
+      "status": "failed",
+      "error_message": "Dynamic require of \"fs\" is not supported",
+      "scheduled_for": "2025-10-30 07:41:02",
+      "created_at": "2025-10-30 07:36:01"
+    },
+    {
+      "id": "6",
+      "status": "failed",
+      "error_message": "Dynamic require of \"fs\" is not supported",
+      "scheduled_for": "2025-10-30 07:39:27",
+      "created_at": "2025-10-30 07:34:26"
+    },
+    {
+      "id": "5",
+      "status": "failed",
+      "error_message": "Dynamic require of \"fs\" is not supported",
+      "scheduled_for": "2025-10-30 07:37:47",
+      "created_at": "2025-10-30 07:32:46"
+    },
+    {
+      "id": "4",
+      "status": "failed",
+      "error_message": "Dynamic require of \"fs\" is not supported",
+      "scheduled_for": "2025-10-30 07:37:27",
+      "created_at": "2025-10-30 07:32:27"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tstatus\terror_message\tscheduled_for\tcreated_at\n8\tfailed\trequire is not defined\t2025-10-30 07:36:19\t2025-10-30 07:36:19\n7\tfailed\tDynamic require of \"fs\" is not supported\t2025-10-30 07:41:02\t2025-10-30 07:36:01\n6\tfailed\tDynamic require of \"fs\" is not supported\t2025-10-30 07:39:27\t2025-10-30 07:34:26\n5\tfailed\tDynamic require of \"fs\" is not supported\t2025-10-30 07:37:47\t2025-10-30 07:32:46\n4\tfailed\tDynamic require of \"fs\" is not supported\t2025-10-30 07:37:27\t2025-10-30 07:32:27\n",
+  "stderr": "",
+  "execution_time_ms": 1594
+}

@@ -8,7 +8,8 @@ import {
   recordFollowedAccount,
   updateInstagramAccountSession,
 } from './automationDb';
-import { instagramService } from './instagramService';
+import { instagramPlaywrightService } from './instagramPlaywrightService';
+import { generateDiverseContent } from './contentGenerator';
 import { generateImage } from './_core/imageGeneration';
 import { ENV } from './_core/env';
 import https from 'https';
@@ -134,20 +135,18 @@ class AutomationScheduler {
           // Post to Instagram
           const { username, password } = getInstagramCredentials();
 
-          const result = await instagramService.postToInstagram(
+          const result = await instagramPlaywrightService.postToInstagram(
             username,
             password,
             imagePath,
             post.content,
-            hashtags,
-            account.sessionData || undefined
+            hashtags
           );
 
           if (result.success) {
             // Update post status
             await updatePostStatus(post.id, 'posted', {
               postedAt: new Date(),
-              instagramMediaId: result.mediaId,
             });
 
             // Update session data
@@ -161,7 +160,6 @@ class AutomationScheduler {
               actionType: 'post',
               actionDetails: JSON.stringify({
                 postId: post.id,
-                mediaId: result.mediaId,
               }),
               status: 'success',
             });
@@ -228,34 +226,9 @@ class AutomationScheduler {
 
       const { username, password } = getInstagramCredentials();
 
-      // Follow 1 user from the hashtag
-      const result = await instagramService.followUsersByHashtag(
-        username,
-        password,
-        randomHashtag,
-        1,
-        account.sessionData || undefined
-      );
-
-      if (result.success && result.followed > 0) {
-        // Update session
-        if ((result as any).sessionData) {
-          await updateInstagramAccountSession(account.id, (result as any).sessionData);
-        }
-
-        // Log activity
-        await logActivity({
-          accountId: account.id,
-          actionType: 'follow',
-          actionDetails: JSON.stringify({
-            hashtag: randomHashtag,
-            count: result.followed,
-          }),
-          status: 'success',
-        });
-
-        console.log(`[Scheduler] Followed ${result.followed} users from #${randomHashtag}`);
-      }
+      // Note: Following functionality will be implemented separately with Playwright
+      // For now, skip following to focus on posting
+      console.log('[Scheduler] Following feature temporarily disabled during migration to Playwright');
     } catch (error) {
       console.error('[Scheduler] Error in processFollowing:', error);
     }

@@ -1,7 +1,6 @@
-import { spawn } from 'child_process';
 import path from 'path';
 import { promisify } from 'util';
-import { exec } from 'child_process';
+import { exec, spawn } from 'child_process';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
