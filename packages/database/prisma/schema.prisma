@@ -10,7 +10,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// User model
+// ============================================================
+// USER & SUBSCRIPTION MODELS
+// ============================================================
+
 model User {
   id            Int       @id @default(autoincrement())
   email         String    @unique
@@ -21,11 +24,13 @@ model User {
   // Relations
   projects      Project[]
   subscriptions Subscription[]
+  instagramAccounts InstagramAccount[]
+  socialAccounts SocialAccount[]
+  monitoringConfigs MonitoringConfig[]
   
   @@map("users")
 }
 
-// Subscription model
 model Subscription {
   id            Int       @id @default(autoincrement())
   userId        Int
@@ -33,6 +38,8 @@ model Subscription {
   status        String    // active, canceled, expired
   startDate     DateTime  @default(now())
   endDate       DateTime?
+  stripeCustomerId String?
+  stripeSubscriptionId String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   
@@ -42,7 +49,10 @@ model Subscription {
   @@map("subscriptions")
 }
 
-// Project model (headshot generation project)
+// ============================================================
+// HEADSHOT STUDIO MODELS
+// ============================================================
+
 model Project {
   id            Int       @id @default(autoincrement())
   userId        Int
@@ -62,7 +72,6 @@ model Project {
   @@map("projects")
 }
 
-// Photo model (user uploaded photos)
 model Photo {
   id            Int       @id @default(autoincrement())
   projectId     Int
@@ -78,7 +87,6 @@ model Photo {
   @@map("photos")
 }
 
-// Headshot model (generated headshots)
 model Headshot {
   id            Int       @id @default(autoincrement())
   projectId     Int
@@ -94,13 +102,77 @@ model Headshot {
   
   // Relations
   project       Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  socialPosts   SocialPost[] @relation("HeadshotToSocialPost")
   
   @@map("headshots")
 }
 
-// Instagram Account model (for Instagram automation)
+// ============================================================
+// SOCIAL MANAGER MODELS
+// ============================================================
+
+model SocialAccount {
+  id            Int       @id @default(autoincrement())
+  userId        Int
+  platform      String    // twitter, facebook, linkedin, instagram
+  username      String
+  accessToken   String?   @db.Text
+  refreshToken  String?   @db.Text
+  tokenExpiry   DateTime?
+  isActive      Boolean   @default(true)
+  metadata      Json?     // Platform-specific data
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  posts         SocialPost[]
+  
+  @@unique([userId, platform, username])
+  @@map("social_accounts")
+}
+
+model SocialPost {
+  id            Int       @id @default(autoincrement())
+  accountId     Int
+  platform      String    // twitter, facebook, linkedin, instagram
+  content       String    @db.Text
+  mediaUrls     Json?     // Array of image/video URLs
+  hashtags      String?   @db.Text
+  status        String    // draft, scheduled, posted, failed
+  scheduledFor  DateTime?
+  postedAt      DateTime?
+  postUrl       String?   @db.Text
+  error         String?   @db.Text
+  
+  // Engagement metrics
+  likes         Int       @default(0)
+  comments      Int       @default(0)
+  shares        Int       @default(0)
+  views         Int       @default(0)
+  
+  // AI-generated content
+  aiGenerated   Boolean   @default(false)
+  aiPrompt      String?   @db.Text
+  
+  // Headshot integration
+  headshotId    Int?
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  account       SocialAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  headshot      Headshot? @relation("HeadshotToSocialPost", fields: [headshotId], references: [id])
+  sentimentAnalysis SentimentAnalysis?
+  
+  @@map("social_posts")
+}
+
+// Instagram Account model (legacy - for backward compatibility)
 model InstagramAccount {
   id            Int       @id @default(autoincrement())
+  userId        Int
   username      String    @unique
   password      String
   sessionData   Json?
@@ -110,12 +182,13 @@ model InstagramAccount {
   updatedAt     DateTime  @updatedAt
   
   // Relations
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   posts         InstagramPost[]
   
   @@map("instagram_accounts")
 }
 
-// Instagram Post model
+// Instagram Post model (legacy - for backward compatibility)
 model InstagramPost {
   id            Int       @id @default(autoincrement())
   accountId     Int
@@ -133,4 +206,120 @@ model InstagramPost {
   account       InstagramAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
   
   @@map("instagram_posts")
+}
+
+// ============================================================
+// SENTIMENT AGENT MODELS
+// ============================================================
+
+model MonitoringConfig {
+  id            Int       @id @default(autoincrement())
+  userId        Int
+  name          String
+  keywords      Json      // Array of keywords to monitor
+  brands        Json      // Array of brand names
+  hashtags      Json      // Array of hashtags
+  platforms     Json      // Array of platforms to monitor
+  isActive      Boolean   @default(true)
+  alertThreshold Float    @default(-0.5) // Alert when sentiment drops below this
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mentions      SocialMention[]
+  
+  @@map("monitoring_configs")
+}
+
+model SocialMention {
+  id            Int       @id @default(autoincrement())
+  configId      Int
+  platform      String    // twitter, facebook, linkedin, instagram, reddit
+  externalId    String    // Platform-specific ID
+  text          String    @db.Text
+  authorUsername String
+  authorDisplayName String
+  authorProfileUrl String @db.Text
+  authorFollowers Int?
+  url           String    @db.Text
+  timestamp     DateTime
+  
+  // Engagement metrics
+  likes         Int       @default(0)
+  comments      Int       @default(0)
+  shares        Int       @default(0)
+  views         Int?
+  
+  isReply       Boolean   @default(false)
+  parentId      String?
+  
+  // Sentiment analysis
+  sentimentScore Float?
+  sentimentLabel String?  // positive, negative, neutral, mixed
+  urgency       String?   // low, medium, high, critical
+  actionable    Boolean   @default(false)
+  
+  // Response tracking
+  responded     Boolean   @default(false)
+  responseText  String?   @db.Text
+  respondedAt   DateTime?
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  config        MonitoringConfig @relation(fields: [configId], references: [id], onDelete: Cascade)
+  analysis      SentimentAnalysis?
+  
+  @@unique([platform, externalId])
+  @@index([configId, timestamp])
+  @@map("social_mentions")
+}
+
+model SentimentAnalysis {
+  id            Int       @id @default(autoincrement())
+  mentionId     Int?      @unique
+  postId        Int?      @unique
+  
+  // Sentiment metrics
+  score         Float     // -1 to 1
+  sentiment     String    // positive, negative, neutral, mixed
+  confidence    Float     // 0 to 1
+  
+  // Emotions
+  emotions      Json?     // { joy, anger, sadness, fear, surprise, disgust }
+  
+  // Topics and keywords
+  keywords      Json?     // Array of keywords
+  topics        Json?     // Array of topics
+  
+  // Urgency and action
+  urgency       String    // low, medium, high, critical
+  actionable    Boolean   @default(false)
+  suggestedResponse String? @db.Text
+  
+  // Analysis metadata
+  analyzedAt    DateTime  @default(now())
+  model         String    @default("claude-sonnet-4")
+  
+  // Relations
+  mention       SocialMention? @relation(fields: [mentionId], references: [id], onDelete: Cascade)
+  post          SocialPost? @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  @@map("sentiment_analyses")
+}
+
+model SentimentAlert {
+  id            Int       @id @default(autoincrement())
+  userId        Int
+  type          String    // negative_spike, positive_trend, urgent_mention
+  severity      String    // low, medium, high
+  message       String    @db.Text
+  data          Json?     // Additional alert data
+  isRead        Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  
+  @@index([userId, isRead])
+  @@map("sentiment_alerts")
 }
