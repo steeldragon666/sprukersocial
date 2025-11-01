@@ -23,6 +23,8 @@ export const createContext = async ({ req, res }: CreateExpressContextOptions) =
       claudeVision: ServiceFactory.getClaudeVision(),
       replicate: ServiceFactory.getReplicate(),
       cloudinary: ServiceFactory.getCloudinary(),
+      project: ServiceFactory.getProject(),
+      payment: ServiceFactory.getPayment(),
     },
   };
 };
