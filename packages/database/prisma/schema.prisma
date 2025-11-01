@@ -1,0 +1,136 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// User model
+model User {
+  id            Int       @id @default(autoincrement())
+  email         String    @unique
+  name          String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  projects      Project[]
+  subscriptions Subscription[]
+  
+  @@map("users")
+}
+
+// Subscription model
+model Subscription {
+  id            Int       @id @default(autoincrement())
+  userId        Int
+  plan          String    // STARTER, PROFESSIONAL, TEAM
+  status        String    // active, canceled, expired
+  startDate     DateTime  @default(now())
+  endDate       DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("subscriptions")
+}
+
+// Project model (headshot generation project)
+model Project {
+  id            Int       @id @default(autoincrement())
+  userId        Int
+  name          String
+  status        String    // uploading, analyzing, training, generating, completed, failed
+  triggerWord   String    @default("TOK")
+  trainingId    String?   // Replicate training ID
+  modelVersion  String?   // Replicate model version
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  photos        Photo[]
+  headshots     Headshot[]
+  
+  @@map("projects")
+}
+
+// Photo model (user uploaded photos)
+model Photo {
+  id            Int       @id @default(autoincrement())
+  projectId     Int
+  url           String    @db.Text
+  qualityScore  Float?
+  feedback      Json?     // PhotoAnalysisResult
+  approved      Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  
+  // Relations
+  project       Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  @@map("photos")
+}
+
+// Headshot model (generated headshots)
+model Headshot {
+  id            Int       @id @default(autoincrement())
+  projectId     Int
+  url           String    @db.Text
+  thumbnailUrl  String?   @db.Text
+  style         String
+  background    String
+  prompt        String    @db.Text
+  aiScore       Float?
+  isTopPick     Boolean   @default(false)
+  metadata      Json?     // HeadshotMetadata
+  createdAt     DateTime  @default(now())
+  
+  // Relations
+  project       Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  @@map("headshots")
+}
+
+// Instagram Account model (for Instagram automation)
+model InstagramAccount {
+  id            Int       @id @default(autoincrement())
+  username      String    @unique
+  password      String
+  sessionData   Json?
+  isActive      Boolean   @default(true)
+  lastPostAt    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  posts         InstagramPost[]
+  
+  @@map("instagram_accounts")
+}
+
+// Instagram Post model
+model InstagramPost {
+  id            Int       @id @default(autoincrement())
+  accountId     Int
+  caption       String    @db.Text
+  imageUrl      String?   @db.Text
+  hashtags      String?   @db.Text
+  status        String    // scheduled, posted, failed
+  scheduledFor  DateTime?
+  postedAt      DateTime?
+  error         String?   @db.Text
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  account       InstagramAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  
+  @@map("instagram_posts")
+}

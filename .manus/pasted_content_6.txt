@@ -1,0 +1,160 @@
+import { z } from 'zod';
+
+// ============================================================
+// PROJECT SCHEMAS
+// ============================================================
+
+export const createProjectSchema = z.object({
+  name: z.string().min(1).max(100).default('My Headshots'),
+  style: z.string().optional(),
+  background: z.string().optional(),
+});
+
+export const updateProjectSchema = z.object({
+  name: z.string().min(1).max(100).optional(),
+  style: z.string().optional(),
+  background: z.string().optional(),
+  customBrand: z
+    .object({
+      colors: z.array(z.string()),
+      website: z.string().url().optional(),
+      logoUrl: z.string().url().optional(),
+    })
+    .optional(),
+});
+
+// ============================================================
+// PHOTO UPLOAD SCHEMAS
+// ============================================================
+
+export const uploadPhotoSchema = z.object({
+  projectId: z.number(),
+  imageUrl: z.string().url(),
+  thumbnailUrl: z.string().url(),
+  width: z.number().optional(),
+  height: z.number().optional(),
+  fileSize: z.number().optional(),
+  mimeType: z.string().optional(),
+});
+
+export const analyzePhotosSchema = z.object({
+  projectId: z.number(),
+});
+
+// ============================================================
+// GENERATION SCHEMAS
+// ============================================================
+
+export const generatePreviewSchema = z.object({
+  projectId: z.number(),
+  style: z.string().optional(),
+  background: z.string().optional(),
+});
+
+export const generateFullSetSchema = z.object({
+  projectId: z.number(),
+  styles: z.array(z.string()).min(1),
+  numPerStyle: z.number().min(5).max(20).default(10),
+});
+
+export const trainModelSchema = z.object({
+  projectId: z.number(),
+  steps: z.number().min(500).max(2000).default(1000),
+});
+
+// ============================================================
+// COACHING SCHEMAS
+// ============================================================
+
+export const getCoachingSchema = z.object({
+  projectId: z.number(),
+});
+
+export const markCoachingResolvedSchema = z.object({
+  coachingId: z.number(),
+});
+
+// ============================================================
+// HEADSHOT SCHEMAS
+// ============================================================
+
+export const getHeadshotsSchema = z.object({
+  projectId: z.number(),
+  topPicksOnly: z.boolean().optional(),
+  favorites: z.boolean().optional(),
+});
+
+export const updateHeadshotSchema = z.object({
+  headshotId: z.number(),
+  userRating: z.number().min(1).max(5).optional(),
+  isFavorite: z.boolean().optional(),
+});
+
+export const downloadHeadshotSchema = z.object({
+  headshotId: z.number(),
+  size: z.enum(['square', 'portrait', 'wide', 'original']),
+});
+
+// ============================================================
+// PAYMENT SCHEMAS
+// ============================================================
+
+export const createCheckoutSessionSchema = z.object({
+  productType: z.enum([
+    'STARTER_PLAN',
+    'PROFESSIONAL_PLAN',
+    'TEAM_PLAN',
+    'EXTRA_BACKGROUNDS',
+    'VIDEO_AVATAR',
+    'BACKGROUND_REMOVAL',
+    'FULL_IMAGE_SET',
+  ]),
+  projectId: z.number().optional(),
+});
+
+export const webhookEventSchema = z.object({
+  id: z.string(),
+  type: z.string(),
+  data: z.any(),
+});
+
+// ============================================================
+// TEAM SCHEMAS
+// ============================================================
+
+export const createTeamSchema = z.object({
+  name: z.string().min(1).max(100),
+  brandColors: z.array(z.string()).optional(),
+  companyWebsite: z.string().url().optional(),
+  logoUrl: z.string().url().optional(),
+});
+
+export const addTeamMemberSchema = z.object({
+  teamId: z.number(),
+  email: z.string().email(),
+  role: z.enum(['OWNER', 'ADMIN', 'MEMBER']).default('MEMBER'),
+});
+
+// ============================================================
+// USER SCHEMAS
+// ============================================================
+
+export const updateUserProfileSchema = z.object({
+  name: z.string().min(1).max(100).optional(),
+  company: z.string().max(100).optional(),
+  website: z.string().url().optional(),
+  industry: z.string().max(50).optional(),
+});
+
+// ============================================================
+// TYPE EXPORTS
+// ============================================================
+
+export type CreateProjectInput = z.infer<typeof createProjectSchema>;
+export type UpdateProjectInput = z.infer<typeof updateProjectSchema>;
+export type UploadPhotoInput = z.infer<typeof uploadPhotoSchema>;
+export type GeneratePreviewInput = z.infer<typeof generatePreviewSchema>;
+export type GenerateFullSetInput = z.infer<typeof generateFullSetSchema>;
+export type CreateCheckoutSessionInput = z.infer<typeof createCheckoutSessionSchema>;
+export type CreateTeamInput = z.infer<typeof createTeamSchema>;
+export type AddTeamMemberInput = z.infer<typeof addTeamMemberSchema>;

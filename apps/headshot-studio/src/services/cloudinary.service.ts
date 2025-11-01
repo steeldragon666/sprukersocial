@@ -1,0 +1,308 @@
+// Cloudinary Service - Image Upload & Management
+// Handles all image storage, transformations, and delivery
+
+import { v2 as cloudinary } from 'cloudinary';
+import sharp from 'sharp';
+
+export class CloudinaryService {
+  constructor(config: {
+    cloudName: string;
+    apiKey: string;
+    apiSecret: string;
+  }) {
+    cloudinary.config({
+      cloud_name: config.cloudName,
+      api_key: config.apiKey,
+      api_secret: config.apiSecret,
+    });
+  }
+
+  /**
+   * Upload image from URL
+   */
+  async uploadFromUrl(
+    imageUrl: string,
+    options?: {
+      folder?: string;
+      publicId?: string;
+      transformation?: any;
+    }
+  ): Promise<{
+    url: string;
+    secureUrl: string;
+    publicId: string;
+    width: number;
+    height: number;
+    format: string;
+    bytes: number;
+  }> {
+    try {
+      const result = await cloudinary.uploader.upload(imageUrl, {
+        folder: options?.folder || 'headshots',
+        public_id: options?.publicId,
+        transformation: options?.transformation,
+        resource_type: 'image',
+      });
+
+      return {
+        url: result.url,
+        secureUrl: result.secure_url,
+        publicId: result.public_id,
+        width: result.width,
+        height: result.height,
+        format: result.format,
+        bytes: result.bytes,
+      };
+    } catch (error) {
+      console.error('Cloudinary upload error:', error);
+      throw new Error(`Failed to upload image: ${error}`);
+    }
+  }
+
+  /**
+   * Upload image from buffer
+   */
+  async uploadFromBuffer(
+    buffer: Buffer,
+    options?: {
+      folder?: string;
+      publicId?: string;
+      transformation?: any;
+    }
+  ): Promise<{
+    url: string;
+    secureUrl: string;
+    publicId: string;
+  }> {
+    return new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: options?.folder || 'headshots',
+          public_id: options?.publicId,
+          transformation: options?.transformation,
+          resource_type: 'image',
+        },
+        (error, result) => {
+          if (error) {
+            reject(error);
+          } else if (result) {
+            resolve({
+              url: result.url,
+              secureUrl: result.secure_url,
+              publicId: result.public_id,
+            });
+          }
+        }
+      );
+
+      uploadStream.end(buffer);
+    });
+  }
+
+  /**
+   * Generate thumbnail
+   */
+  async generateThumbnail(
+    imageUrl: string,
+    size: { width: number; height: number } = { width: 300, height: 300 }
+  ): Promise<string> {
+    try {
+      // Use Cloudinary's URL-based transformations
+      const publicId = this.extractPublicId(imageUrl);
+      
+      return cloudinary.url(publicId, {
+        transformation: [
+          { width: size.width, height: size.height, crop: 'fill' },
+          { quality: 'auto' },
+          { fetch_format: 'auto' },
+        ],
+      });
+    } catch (error) {
+      console.error('Thumbnail generation error:', error);
+      throw new Error(`Failed to generate thumbnail: ${error}`);
+    }
+  }
+
+  /**
+   * Generate multiple sizes (square, portrait, wide)
+   */
+  async generateSizes(imageUrl: string): Promise<{
+    square: string;
+    portrait: string;
+    wide: string;
+    thumbnail: string;
+  }> {
+    const publicId = this.extractPublicId(imageUrl);
+
+    return {
+      square: cloudinary.url(publicId, {
+        transformation: [
+          { width: 1024, height: 1024, crop: 'fill' },
+          { quality: 'auto:best' },
+        ],
+      }),
+      portrait: cloudinary.url(publicId, {
+        transformation: [
+          { width: 800, height: 1200, crop: 'fill' },
+          { quality: 'auto:best' },
+        ],
+      }),
+      wide: cloudinary.url(publicId, {
+        transformation: [
+          { width: 1200, height: 630, crop: 'fill' },
+          { quality: 'auto:best' },
+        ],
+      }),
+      thumbnail: cloudinary.url(publicId, {
+        transformation: [
+          { width: 400, height: 400, crop: 'fill' },
+          { quality: 'auto' },
+        ],
+      }),
+    };
+  }
+
+  /**
+   * Optimize image for web delivery
+   */
+  async optimizeForWeb(imageUrl: string): Promise<string> {
+    const publicId = this.extractPublicId(imageUrl);
+
+    return cloudinary.url(publicId, {
+      transformation: [
+        { quality: 'auto:good' },
+        { fetch_format: 'auto' }, // Auto WebP/AVIF
+        { flags: 'progressive' },
+      ],
+    });
+  }
+
+  /**
+   * Apply transformations (filters, adjustments)
+   */
+  async applyTransformations(
+    imageUrl: string,
+    transformations: {
+      brightness?: number; // -100 to 100
+      contrast?: number; // -100 to 100
+      saturation?: number; // -100 to 100
+      sharpen?: number; // 0 to 100
+      blur?: number; // 0 to 2000
+    }
+  ): Promise<string> {
+    const publicId = this.extractPublicId(imageUrl);
+    const effects: any[] = [];
+
+    if (transformations.brightness !== undefined) {
+      effects.push({ effect: `brightness:${transformations.brightness}` });
+    }
+    if (transformations.contrast !== undefined) {
+      effects.push({ effect: `contrast:${transformations.contrast}` });
+    }
+    if (transformations.saturation !== undefined) {
+      effects.push({ effect: `saturation:${transformations.saturation}` });
+    }
+    if (transformations.sharpen !== undefined) {
+      effects.push({ effect: `sharpen:${transformations.sharpen}` });
+    }
+    if (transformations.blur !== undefined) {
+      effects.push({ effect: `blur:${transformations.blur}` });
+    }
+
+    return cloudinary.url(publicId, {
+      transformation: effects,
+    });
+  }
+
+  /**
+   * Delete image
+   */
+  async deleteImage(publicId: string): Promise<void> {
+    try {
+      await cloudinary.uploader.destroy(publicId);
+    } catch (error) {
+      console.error('Image deletion error:', error);
+      throw new Error(`Failed to delete image: ${error}`);
+    }
+  }
+
+  /**
+   * Get image metadata
+   */
+  async getImageInfo(publicId: string): Promise<{
+    width: number;
+    height: number;
+    format: string;
+    bytes: number;
+    url: string;
+  }> {
+    try {
+      const result = await cloudinary.api.resource(publicId);
+
+      return {
+        width: result.width,
+        height: result.height,
+        format: result.format,
+        bytes: result.bytes,
+        url: result.secure_url,
+      };
+    } catch (error) {
+      console.error('Get image info error:', error);
+      throw new Error(`Failed to get image info: ${error}`);
+    }
+  }
+
+  /**
+   * Extract public ID from Cloudinary URL
+   */
+  private extractPublicId(url: string): string {
+    // Extract public_id from Cloudinary URL
+    // Example: https://res.cloudinary.com/demo/image/upload/v1234567890/headshots/image.jpg
+    const matches = url.match(/\/upload\/(?:v\d+\/)?(.+?)(?:\.[^.]+)?$/);
+    return matches ? matches[1] : url;
+  }
+
+  /**
+   * Create download URL with original quality
+   */
+  async createDownloadUrl(
+    publicId: string,
+    filename?: string
+  ): Promise<string> {
+    return cloudinary.url(publicId, {
+      flags: 'attachment',
+      attachment: filename || 'headshot',
+      quality: 'auto:best',
+    });
+  }
+
+  /**
+   * Batch upload multiple images
+   */
+  async batchUpload(
+    imageUrls: string[],
+    folder: string = 'headshots'
+  ): Promise<Array<{
+    url: string;
+    publicId: string;
+    originalUrl: string;
+  }>> {
+    const results = await Promise.all(
+      imageUrls.map(async (imageUrl) => {
+        try {
+          const result = await this.uploadFromUrl(imageUrl, { folder });
+          return {
+            url: result.secureUrl,
+            publicId: result.publicId,
+            originalUrl: imageUrl,
+          };
+        } catch (error) {
+          console.error(`Failed to upload ${imageUrl}:`, error);
+          throw error;
+        }
+      })
+    );
+
+    return results;
+  }
+}

@@ -1,0 +1,219 @@
+// Headshot Studio Pro - Shared Types & Constants
+
+export const STYLE_PRESETS = {
+  CORPORATE: {
+    name: 'Corporate',
+    description: 'Professional business attire, formal setting',
+    background: 'office',
+    modifiers: 'executive business style, dark navy suit, crisp white shirt, professional office background, confident expression, formal lighting',
+  },
+  CREATIVE: {
+    name: 'Creative',
+    description: 'Artistic, casual professional look',
+    background: 'studio',
+    modifiers: 'creative professional style, casual blazer, artistic background, natural expression, soft lighting, contemporary aesthetic',
+  },
+  MEDICAL: {
+    name: 'Medical',
+    description: 'Healthcare professional, clinical setting',
+    background: 'clinical',
+    modifiers: 'healthcare professional, white coat, clean clinical background, trustworthy expression, bright even lighting, approachable',
+  },
+  REAL_ESTATE: {
+    name: 'Real Estate',
+    description: 'Business casual, approachable',
+    background: 'outdoor',
+    modifiers: 'real estate professional, business casual, luxury home background, warm friendly expression, natural outdoor lighting, approachable',
+  },
+  LAW: {
+    name: 'Law',
+    description: 'Professional, trustworthy, formal',
+    background: 'office',
+    modifiers: 'legal professional, formal business suit, library or office background, confident and trustworthy, professional lighting',
+  },
+  TECH: {
+    name: 'Tech',
+    description: 'Modern, casual professional',
+    background: 'modern_office',
+    modifiers: 'tech professional, smart casual, modern office background, approachable expression, natural lighting, contemporary style',
+  },
+  FINANCE: {
+    name: 'Finance',
+    description: 'Formal, professional, conservative',
+    background: 'executive_office',
+    modifiers: 'finance professional, formal dark suit, executive office background, confident expression, professional lighting, conservative style',
+  },
+  ACADEMIC: {
+    name: 'Academic',
+    description: 'Scholarly, approachable',
+    background: 'library',
+    modifiers: 'academic professional, business casual or blazer, library or campus background, thoughtful expression, natural lighting, scholarly appearance',
+  },
+} as const;
+
+export const BACKGROUND_TYPES = {
+  OFFICE: 'Professional office setting',
+  STUDIO: 'Clean studio background',
+  OUTDOOR: 'Natural outdoor setting',
+  CUSTOM: 'Custom branded background',
+  GRADIENT: 'Solid color gradient',
+  BLUR: 'Subtle blurred background',
+} as const;
+
+export const PRICING = {
+  STARTER: {
+    name: 'Starter',
+    price: 3900, // $39 in cents
+    photosUploaded: 10,
+    headshotsGenerated: 40,
+    topPicks: 10,
+    features: ['Standard backgrounds', 'Social media sizes', 'AI quality selection'],
+  },
+  PROFESSIONAL: {
+    name: 'Professional',
+    price: 7900, // $79 in cents
+    photosUploaded: 20,
+    headshotsGenerated: 100,
+    topPicks: 20,
+    features: [
+      'Custom background matching',
+      'Brand color integration',
+      'LinkedIn integration',
+      'All sizes + formats',
+      'Priority processing',
+    ],
+  },
+  TEAM: {
+    name: 'Team',
+    price: 29900, // $299 in cents
+    members: 5,
+    headshotsPerMember: 100,
+    features: [
+      'Consistent style across team',
+      'Company branding',
+      'Team page generator',
+      'Priority support',
+    ],
+  },
+} as const;
+
+export const ADD_ONS = {
+  EXTRA_BACKGROUNDS: {
+    name: 'Extra Background Styles',
+    price: 1900, // $19
+  },
+  VIDEO_AVATAR: {
+    name: 'Video Avatar',
+    price: 4900, // $49
+  },
+  MONTHLY_REFRESH: {
+    name: 'Monthly Refresh',
+    price: 2900, // $29/month
+    recurring: true,
+  },
+  BACKGROUND_REMOVAL: {
+    name: 'Background Removal Pack',
+    price: 900, // $9
+  },
+  FULL_SET: {
+    name: 'Full 100-Image Set',
+    price: 2900, // $29
+  },
+} as const;
+
+export const QUALITY_THRESHOLDS = {
+  EXCELLENT: 9.0,
+  GOOD: 7.5,
+  ACCEPTABLE: 6.0,
+  NEEDS_IMPROVEMENT: 5.0,
+} as const;
+
+export const COACHING_MESSAGES = {
+  LIGHTING: {
+    title: 'Improve Your Lighting',
+    tips: [
+      'Face a window or light source',
+      'Avoid harsh overhead lighting',
+      'Use natural daylight when possible',
+      'Ensure your face is evenly lit',
+    ],
+  },
+  BACKGROUND: {
+    title: 'Better Background Needed',
+    tips: [
+      'Use a plain, neutral wall',
+      'Avoid busy or cluttered backgrounds',
+      'Remove personal items from view',
+      'Keep distance from the background',
+    ],
+  },
+  EXPRESSION: {
+    title: 'Natural Expression Tips',
+    tips: [
+      'Think of something that makes you smile naturally',
+      'Relax your shoulders',
+      'Look slightly above the camera lens',
+      'Practice a few expressions beforehand',
+    ],
+  },
+  ANGLE: {
+    title: 'Camera Angle Suggestions',
+    tips: [
+      'Camera should be at eye level',
+      'Try slight angles (not just straight-on)',
+      'Keep your head straight',
+      'Show your shoulders in frame',
+    ],
+  },
+  QUANTITY: {
+    title: 'Upload More Photos',
+    tips: [
+      'We recommend at least 15-20 photos',
+      'More variety = better results',
+      'Include different angles',
+      'Upload a few different expressions',
+    ],
+  },
+  VARIETY: {
+    title: 'Add More Variety',
+    tips: [
+      'Include photos from different angles',
+      'Vary your expressions slightly',
+      'Try different head tilts',
+      'Include some with neutral expressions',
+    ],
+  },
+} as const;
+
+export interface PhotoAnalysisResult {
+  qualityScore: number;
+  feedback: {
+    lighting: 'excellent' | 'good' | 'poor';
+    background: 'excellent' | 'good' | 'poor';
+    expression: 'excellent' | 'good' | 'poor';
+    angle: 'excellent' | 'good' | 'poor';
+    focus: 'excellent' | 'good' | 'poor';
+  };
+  suggestions: string[];
+  approved: boolean;
+}
+
+export interface GenerationConfig {
+  style: keyof typeof STYLE_PRESETS;
+  background: keyof typeof BACKGROUND_TYPES;
+  customBrand?: {
+    colors: string[];
+    website?: string;
+    logoUrl?: string;
+  };
+  numOutputs: number;
+  inferenceSteps: number;
+}
+
+export interface HeadshotMetadata {
+  prompt: string;
+  style: string;
+  background: string;
+  aiScore?: number;
+  generatedAt: Date;
+}

@@ -1,0 +1,492 @@
+# 🎨 Headshot Studio Pro
+
+An AI-powered professional headshot generation platform that creates stunning professional photos in minutes. Built with Claude Vision for quality analysis, Replicate Flux for generation, and includes instant preview, AI coaching, and team features.
+
+## ✨ Key Features
+
+### Core Features
+- **Instant Quality Analysis** - Claude Vision analyzes photos immediately and provides quality scores
+- **30-Second Previews** - See results before full generation starts
+- **AI Coaching** - Get personalized tips to improve your photos
+- **Smart Background Matching** - Match your company's brand and colors
+- **Team Consistency** - Ensure all team member headshots match
+- **Multiple Styles** - Corporate, Creative, Medical, Real Estate, Law, Tech, Finance, Academic
+
+### Technical Advantages
+- **Fast Generation** - Preview in 30 seconds, full set in 20 minutes
+- **High Quality** - Professional-grade images using Flux LoRA models
+- **Scalable** - Built on modern stack with tRPC API
+- **Secure Payments** - Stripe integration with webhooks
+
+## 🏗️ Architecture
+
+```
+headshot-studio-pro/
+├── apps/
+│   ├── api/          # Express + tRPC backend
+│   └── web/          # Next.js frontend
+├── packages/
+│   ├── database/     # Prisma schema & client
+│   └── shared/       # Shared types & constants
+```
+
+### Tech Stack
+
+**Backend:**
+- Express.js - Web server
+- tRPC - Type-safe API
+- Prisma - Database ORM
+- MySQL/TiDB - Database
+
+**AI Services:**
+- Claude Vision (Anthropic) - Photo analysis & coaching
+- Replicate Flux - Model training & image generation
+- Cloudinary - Image storage & CDN
+
+**Frontend:**
+- Next.js 14 - React framework
+- TailwindCSS - Styling
+- React Query - Data fetching
+- TypeScript - Type safety
+
+**Payments:**
+- Stripe - Checkout & webhooks
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 18+ and pnpm
+- MySQL database (or PlanetScale/TiDB)
+- API keys for:
+  - Anthropic (Claude)
+  - Replicate
+  - Cloudinary
+  - Stripe
+
+### 1. Clone and Install
+
+```bash
+git clone <your-repo>
+cd headshot-studio-pro
+
+# Install dependencies
+pnpm install
+```
+
+### 2. Environment Setup
+
+Copy `.env.example` and configure:
+
+```bash
+cp .env.example .env
+```
+
+Required environment variables:
+
+```env
+# Database
+DATABASE_URL="mysql://user:password@localhost:3306/headshot_studio"
+
+# Anthropic API (Claude Vision)
+ANTHROPIC_API_KEY="sk-ant-..."
+
+# Replicate API (Model Training & Generation)
+REPLICATE_API_TOKEN="r8_..."
+
+# Cloudinary (Image Storage)
+CLOUDINARY_CLOUD_NAME="your_cloud_name"
+CLOUDINARY_API_KEY="..."
+CLOUDINARY_API_SECRET="..."
+
+# Stripe (Payments)
+STRIPE_API_KEY="sk_test_..."
+STRIPE_WEBHOOK_SECRET="whsec_..."
+
+# Server
+PORT=4000
+FRONTEND_URL="http://localhost:3000"
+```
+
+### 3. Database Setup
+
+```bash
+# Push schema to database
+pnpm db:push
+
+# Or run migrations (production)
+cd packages/database
+pnpm prisma migrate dev
+```
+
+### 4. Run Development Servers
+
+```bash
+# Start all services (from root)
+pnpm dev
+
+# Or start individually
+cd apps/api && pnpm dev
+cd apps/web && pnpm dev
+```
+
+The application will be available at:
+- **Frontend:** http://localhost:3000
+- **API:** http://localhost:4000
+- **tRPC Endpoint:** http://localhost:4000/trpc
+
+## 📖 API Documentation
+
+### tRPC Routes
+
+#### Projects
+- `project.create` - Create new project
+- `project.get` - Get project details
+- `project.update` - Update project
+- `project.list` - List user projects
+- `project.delete` - Delete project
+
+#### Photos
+- `photo.upload` - Upload and analyze photo
+- `photo.analyzeAll` - Analyze all photos in project
+
+#### Training
+- `training.start` - Start model training
+- `training.status` - Check training progress
+
+#### Generation
+- `generation.preview` - Generate 3 preview shots (30 seconds)
+- `generation.full` - Generate full set (100 shots)
+
+#### Headshots
+- `headshot.list` - Get generated headshots
+- `headshot.update` - Rate/favorite headshots
+- `headshot.download` - Download in different sizes
+
+#### Payments
+- `payment.createCheckout` - Create Stripe checkout
+- `payment.history` - Get payment history
+
+#### Coaching
+- `coaching.get` - Get AI coaching feedback
+- `coaching.resolve` - Mark coaching as resolved
+
+### Example Usage (Frontend)
+
+```typescript
+import { trpc } from '@/lib/trpc';
+
+// Create project
+const createProject = trpc.project.create.useMutation();
+await createProject.mutateAsync({ name: 'My Headshots' });
+
+// Upload photo
+const uploadPhoto = trpc.photo.upload.useMutation();
+await uploadPhoto.mutateAsync({
+  projectId: 1,
+  imageUrl: 'https://...',
+  thumbnailUrl: 'https://...',
+});
+
+// Generate preview
+const generatePreview = trpc.generation.preview.useMutation();
+await generatePreview.mutateAsync({
+  projectId: 1,
+  style: 'CORPORATE',
+});
+```
+
+## 🎨 User Workflow
+
+### 1. Create Project & Upload Photos (2-3 minutes)
+```
+User → Upload 10-20 selfies
+      → Claude Vision analyzes immediately
+      → Quality scores displayed
+      → Coaching tips provided
+```
+
+### 2. Style Selection (1 minute)
+```
+User → Choose style (Corporate, Creative, etc.)
+      → Optional: Match company website
+      → Optional: Set brand colors
+```
+
+### 3. Preview Generation (30 seconds)
+```
+System → Starts model training
+        → Generates 3 preview shots
+        → User approves or adjusts
+```
+
+### 4. Full Generation (20 minutes)
+```
+System → Trains custom LoRA model
+        → Generates 100 variations
+        → AI selects "Top 20"
+        → User downloads favorites
+```
+
+## 💰 Pricing Tiers
+
+| Plan | Price | Features |
+|------|-------|----------|
+| **Starter** | $39 | 10 uploads, 40 headshots, Top 10 |
+| **Professional** | $79 | 20 uploads, 100 headshots, Top 20, Brand matching |
+| **Team** | $299 | 5 members, Consistent styling, Priority |
+
+### Add-Ons
+- Extra backgrounds: $19
+- Video avatar: $49
+- Monthly refresh: $29/month
+- Background removal: $9
+- Full 100-image set: $29
+
+## 🔧 Development
+
+### Project Structure
+
+```
+apps/api/src/
+├── services/
+│   ├── claude-vision.service.ts   # Photo analysis
+│   ├── replicate.service.ts       # Model training & generation
+│   ├── cloudinary.service.ts      # Image storage
+│   ├── project.service.ts         # Business logic
+│   └── payment.service.ts         # Stripe integration
+├── router.ts                       # tRPC routes
+├── trpc.ts                         # tRPC setup
+└── index.ts                        # Express server
+
+packages/database/prisma/
+└── schema.prisma                   # Database models
+
+packages/shared/src/
+├── constants.ts                    # Shared constants
+└── schemas.ts                      # Validation schemas
+```
+
+### Key Services
+
+#### ClaudeVisionService
+- Analyzes photo quality (lighting, background, expression, etc.)
+- Generates coaching feedback
+- Scores photos 0-10
+- Provides actionable suggestions
+
+#### ReplicateService
+- Trains custom Flux LoRA models
+- Generates preview shots (fast)
+- Generates full sets (high quality)
+- Handles upscaling and background removal
+
+#### CloudinaryService
+- Uploads and stores images
+- Generates thumbnails
+- Creates multiple sizes (square, portrait, wide)
+- Optimizes for web delivery
+
+#### ProjectService
+- Orchestrates the entire workflow
+- Manages project lifecycle
+- Coordinates AI services
+- Handles generation queue
+
+#### PaymentService
+- Creates Stripe checkout sessions
+- Processes webhooks
+- Updates user plans
+- Handles refunds
+
+## 🚢 Deployment
+
+### Database (PlanetScale/Railway)
+
+```bash
+# Set DATABASE_URL in environment
+export DATABASE_URL="mysql://..."
+
+# Push schema
+pnpm db:push
+```
+
+### API Server (Railway/Render/Fly.io)
+
+```bash
+# Set all environment variables
+# Deploy from apps/api
+
+# Build
+pnpm build
+
+# Start
+pnpm start
+```
+
+### Frontend (Vercel/Netlify)
+
+```bash
+# Deploy from apps/web
+# Set API_URL environment variable
+
+vercel deploy
+```
+
+### Stripe Webhooks
+
+Set webhook URL in Stripe dashboard:
+```
+https://your-api-domain.com/webhooks/stripe
+```
+
+Events to listen for:
+- `checkout.session.completed`
+- `payment_intent.succeeded`
+- `payment_intent.payment_failed`
+- `customer.subscription.created`
+- `customer.subscription.updated`
+- `customer.subscription.deleted`
+
+## 📊 Monitoring & Analytics
+
+### Database Queries
+- Monitor slow queries in Prisma
+- Use database indexes effectively
+- Consider read replicas for scale
+
+### API Performance
+- tRPC has built-in performance tracking
+- Monitor Anthropic API usage
+- Track Replicate generation times
+- Monitor Cloudinary bandwidth
+
+### User Analytics
+- Track conversion rates
+- Monitor generation success rates
+- Analyze popular styles
+- Track payment success rates
+
+## 🔒 Security
+
+- **API Keys**: Never commit to git
+- **Authentication**: Implement JWT or session-based auth
+- **Rate Limiting**: Add rate limiters to prevent abuse
+- **Input Validation**: All inputs validated with Zod
+- **Image Upload**: Validate file types and sizes
+- **Payment Security**: Stripe handles PCI compliance
+- **Database**: Use connection pooling, prepared statements
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+**Training fails:**
+- Verify Replicate API token
+- Ensure at least 10 photos uploaded
+- Check photo URLs are accessible
+- Verify photo format (JPG/PNG)
+
+**Photos won't upload:**
+- Check Cloudinary credentials
+- Verify file size < 10MB
+- Ensure proper MIME types
+
+**Payment webhook not working:**
+- Verify webhook secret in Stripe
+- Check webhook URL is accessible
+- Ensure raw body parsing for webhook endpoint
+
+**Generation takes too long:**
+- Replicate training typically takes 10-20 minutes
+- Check Replicate dashboard for status
+- Consider using GPU-backed instances
+
+## 📈 Scaling Considerations
+
+### Phase 1 (0-100 users)
+- Single server setup
+- Basic monitoring
+- Manual customer support
+
+### Phase 2 (100-1000 users)
+- Add Redis for caching
+- Queue system for generations (BullMQ)
+- Automated email notifications
+- Database read replicas
+
+### Phase 3 (1000+ users)
+- Microservices architecture
+- Load balancing
+- CDN for static assets
+- Advanced monitoring (Datadog/New Relic)
+- Customer success team
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
+
+## 📝 License
+
+Private - All Rights Reserved
+
+## 🎯 Roadmap
+
+### Q1 2025
+- [x] Core headshot generation
+- [x] Claude Vision analysis
+- [x] Payment integration
+- [ ] User authentication system
+- [ ] Email notifications
+
+### Q2 2025
+- [ ] Video avatars
+- [ ] Background replacement tool
+- [ ] Mobile app
+- [ ] Team dashboard
+- [ ] API for partners
+
+### Q3 2025
+- [ ] White-label solution
+- [ ] Batch processing (100+ people)
+- [ ] Advanced editing tools
+- [ ] LinkedIn integration
+- [ ] Calendar integration
+
+## 💡 Tips for Success
+
+1. **Quality Input = Quality Output**
+   - Encourage users to upload 15-20 high-quality photos
+   - Use the coaching feature to guide users
+   - Show before/after examples
+
+2. **Pricing Strategy**
+   - Start with Professional plan ($79) as default
+   - Upsell add-ons after successful generation
+   - Offer team discounts for bulk purchases
+
+3. **Marketing**
+   - Target real estate agents, lawyers, consultants
+   - Partner with coworking spaces
+   - LinkedIn ads work well
+   - Before/after posts go viral
+
+4. **Customer Support**
+   - Respond quickly to issues
+   - Collect feedback continuously
+   - Iterate on prompt engineering
+   - Monitor generation quality
+
+## 📞 Support
+
+- Documentation: [docs link]
+- Email: support@headshotstudio.com
+- Discord: [community link]
+
+---
+
+Built with ❤️ using Claude, Replicate, and modern web technologies.
