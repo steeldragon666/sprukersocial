@@ -41,3 +41,20 @@
 - [ ] Test multi-account management
 - [ ] Update user guide
 - [ ] Create deployment checkpoint
+
+## Phase 4: Instagram Intelligence Agent
+- [x] Extend schema with campaigns, comments, visual_analysis, performance_insights, trends, alerts tables
+- [ ] Implement sentiment analysis service (Claude for comment analysis)
+- [ ] Implement visual analysis service (Claude Vision for image analysis)
+- [ ] Implement insights generation service (AI-powered recommendations)
+- [ ] Implement trends detection service
+- [ ] Create campaigns router
+- [ ] Create comments router (scraping, analysis, response suggestions)
+- [ ] Create insights router
+- [ ] Create trends router
+- [ ] Create alerts router
+- [ ] Build intelligence dashboard UI
+- [ ] Build sentiment tracking UI
+- [ ] Build visual analysis UI
+- [ ] Build campaign management UI
+- [ ] Build trends visualization UI

@@ -1,0 +1,400 @@
+lets also add a sentiment tracking agent 
+/**
+ * INSTAGRAM INTELLIGENCE AGENT - DATABASE SCHEMA
+ * Extends the main schema with agent-specific tables
+ */
+
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, json, float, boolean } from "drizzle-orm/mysql-core";
+import { relations } from "drizzle-orm";
+
+// ============================================================================
+// CAMPAIGNS
+// ============================================================================
+
+export const campaigns = mysqlTable("campaigns", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("user_id").notNull(),
+  accountId: int("account_id").notNull(),
+  
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  
+  // Campaign goals
+  goal: mysqlEnum("goal", [
+    "awareness",      // Brand awareness
+    "engagement",     // Drive engagement
+    "traffic",        // Drive traffic
+    "conversions",    // Drive conversions
+    "followers"       // Grow followers
+  ]).notNull(),
+  
+  targetMetric: varchar("target_metric", { length: 50 }), // e.g., "reach", "engagement_rate"
+  targetValue: float("target_value"), // e.g., 10000 reach or 5% engagement
+  
+  // Campaign details
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date"),
+  budget: float("budget"), // Optional budget tracking
+  
+  // Status
+  status: mysqlEnum("status", ["active", "paused", "completed", "archived"]).default("active").notNull(),
+  
+  // Metadata
+  tags: json("tags").$type<string[]>(), // Campaign tags
+  
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Campaign = typeof campaigns.$inferSelect;
+export type InsertCampaign = typeof campaigns.$inferInsert;
+
+// ============================================================================
+// CAMPAIGN POSTS (Many-to-Many relationship)
+// ============================================================================
+
+export const campaignPosts = mysqlTable("campaign_posts", {
+  id: int("id").autoincrement().primaryKey(),
+  campaignId: int("campaign_id").notNull(),
+  postId: int("post_id").notNull(),
+  
+  addedAt: timestamp("added_at").defaultNow().notNull(),
+});
+
+// ============================================================================
+// COMMENTS (Scraped from Instagram)
+// ============================================================================
+
+export const comments = mysqlTable("comments", {
+  id: int("id").autoincrement().primaryKey(),
+  postId: int("post_id").notNull(),
+  
+  // Instagram data
+  instagramCommentId: varchar("instagram_comment_id", { length: 255 }).notNull().unique(),
+  username: varchar("username", { length: 255 }).notNull(),
+  text: text("text").notNull(),
+  timestamp: timestamp("timestamp").notNull(),
+  
+  // Parent comment (for replies)
+  parentCommentId: int("parent_comment_id"),
+  
+  // Sentiment analysis
+  sentiment: mysqlEnum("sentiment", ["positive", "neutral", "negative", "toxic"]),
+  sentimentScore: float("sentiment_score"), // -1 to 1
+  sentimentConfidence: float("sentiment_confidence"), // 0 to 1
+  
+  // Categorization
+  category: mysqlEnum("category", [
+    "question",       // User asking a question
+    "praise",         // Positive feedback
+    "complaint",      // Negative feedback
+    "spam",           // Spam/promotional
+    "request",        // Feature/product request
+    "general"         // General comment
+  ]),
+  
+  // AI analysis
+  aiSummary: text("ai_summary"), // Claude's summary of the comment
+  suggestedResponse: text("suggested_response"), // AI-suggested reply
+  
+  // Response tracking
+  hasResponded: boolean("has_responded").default(false),
+  respondedAt: timestamp("responded_at"),
+  responseText: text("response_text"),
+  
+  // Flags
+  requiresAttention: boolean("requires_attention").default(false), // Needs human review
+  isHidden: boolean("is_hidden").default(false), // Hidden by moderator
+  
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  analyzedAt: timestamp("analyzed_at"),
+});
+
+export type Comment = typeof comments.$inferSelect;
+export type InsertComment = typeof comments.$inferInsert;
+
+// ============================================================================
+// VISUAL ANALYSIS (Claude Vision analysis of images)
+// ============================================================================
+
+export const visualAnalysis = mysqlTable("visual_analysis", {
+  id: int("id").autoincrement().primaryKey(),
+  postId: int("post_id").notNull().unique(),
+  
+  // AI-generated analysis
+  description: text("description").notNull(), // What's in the image
+  composition: text("composition"), // Layout, rule of thirds, etc.
+  colorPalette: json("color_palette").$type<string[]>(), // Dominant colors
+  emotions: json("emotions").$type<string[]>(), // Emotions conveyed
+  subjects: json("subjects").$type<string[]>(), // Main subjects
+  style: varchar("style", { length: 100 }), // photographic, illustration, minimalist
+  
+  // Quality scores (0-10)
+  visualQualityScore: float("visual_quality_score"),
+  emotionalImpactScore: float("emotional_impact_score"),
+  clarityScore: float("clarity_score"),
+  brandAlignmentScore: float("brand_alignment_score"),
+  
+  // Performance correlation
+  predictedEngagement: float("predicted_engagement"), // AI prediction
+  actualEngagement: float("actual_engagement"), // Real performance
+  
+  // Insights
+  strengths: json("strengths").$type<string[]>(), // What works well
+  improvements: json("improvements").$type<string[]>(), // Suggestions
+  
+  // Similar posts
+  similarPostIds: json("similar_post_ids").$type<number[]>(), // Similar high-performing posts
+  
+  analyzedAt: timestamp("analyzed_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+export type VisualAnalysis = typeof visualAnalysis.$inferSelect;
+export type InsertVisualAnalysis = typeof visualAnalysis.$inferInsert;
+
+// ============================================================================
+// PERFORMANCE INSIGHTS (AI-generated insights)
+// ============================================================================
+
+export const performanceInsights = mysqlTable("performance_insights", {
+  id: int("id").autoincrement().primaryKey(),
+  postId: int("post_id"),
+  campaignId: int("campaign_id"),
+  accountId: int("account_id").notNull(),
+  
+  // Insight type
+  insightType: mysqlEnum("insight_type", [
+    "underperforming",   // Post not meeting expectations
+    "overperforming",    // Post exceeding expectations
+    "trending",          // Post going viral
+    "negative_sentiment",// High negative comments
+    "engagement_drop",   // Sudden drop in engagement
+    "best_time",         // Optimal posting time found
+    "content_suggestion",// Content recommendation
+    "hashtag_recommendation", // Better hashtags
+    "audience_insight"   // Audience behavior pattern
+  ]).notNull(),
+  
+  // Insight details
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  
+  // Severity/Priority
+  priority: mysqlEnum("priority", ["low", "medium", "high", "critical"]).default("medium").notNull(),
+  
+  // Recommendations
+  recommendations: json("recommendations").$type<{
+    action: string;
+    reasoning: string;
+    expectedImpact: string;
+  }[]>(),
+  
+  // Metrics
+  relatedMetrics: json("related_metrics").$type<Record<string, number>>(),
+  
+  // Status
+  status: mysqlEnum("status", ["new", "viewed", "acted_on", "dismissed"]).default("new").notNull(),
+  actedAt: timestamp("acted_at"),
+  
+  // AI confidence
+  confidenceScore: float("confidence_score"), // 0-1
+  
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type PerformanceInsight = typeof performanceInsights.$inferSelect;
+export type InsertPerformanceInsight = typeof performanceInsights.$inferInsert;
+
+// ============================================================================
+// TRENDS (Content trends detected by agent)
+// ============================================================================
+
+export const trends = mysqlTable("trends", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("user_id").notNull(),
+  accountId: int("account_id").notNull(),
+  
+  // Trend details
+  trendType: mysqlEnum("trend_type", [
+    "topic",          // Topic/subject matter
+    "visual_style",   // Visual style/aesthetic
+    "hashtag",        // Hashtag performance
+    "posting_time",   // Best posting times
+    "caption_style",  // Caption writing style
+    "content_format"  // Type of content (carousel, single, video)
+  ]).notNull(),
+  
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  
+  // Performance metrics
+  avgEngagementRate: float("avg_engagement_rate"),
+  avgReach: float("avg_reach"),
+  postCount: int("post_count").default(0),
+  
+  // Trend trajectory
+  isRising: boolean("is_rising").default(true),
+  trendScore: float("trend_score"), // 0-100
+  
+  // Time period
+  detectedAt: timestamp("detected_at").defaultNow().notNull(),
+  periodStart: timestamp("period_start").notNull(),
+  periodEnd: timestamp("period_end").notNull(),
+  
+  // Related data
+  relatedPostIds: json("related_post_ids").$type<number[]>(),
+  relatedHashtags: json("related_hashtags").$type<string[]>(),
+  
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Trend = typeof trends.$inferSelect;
+export type InsertTrend = typeof trends.$inferInsert;
+
+// ============================================================================
+// ALERTS (Real-time notifications)
+// ============================================================================
+
+export const alerts = mysqlTable("alerts", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("user_id").notNull(),
+  accountId: int("account_id"),
+  postId: int("post_id"),
+  campaignId: int("campaign_id"),
+  
+  // Alert type
+  alertType: mysqlEnum("alert_type", [
+    "viral_post",         // Post going viral
+    "negative_comments",  // Spike in negative sentiment
+    "goal_achieved",      // Campaign goal met
+    "underperforming",    // Post not doing well
+    "toxic_comment",      // Toxic comment detected
+    "engagement_spike",   // Unusual engagement
+    "follower_milestone", // Follower count milestone
+    "best_performing",    // New best performing post
+    "requires_response"   // Comment needs response
+  ]).notNull(),
+  
+  title: varchar("title", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  
+  // Severity
+  severity: mysqlEnum("severity", ["info", "warning", "error", "success"]).default("info").notNull(),
+  
+  // Action items
+  actionUrl: varchar("action_url", { length: 500 }), // Deep link to relevant page
+  actionLabel: varchar("action_label", { length: 100 }), // "View Post", "Respond", etc.
+  
+  // Status
+  isRead: boolean("is_read").default(false),
+  readAt: timestamp("read_at"),
+  
+  // Notification channels
+  notifiedViaEmail: boolean("notified_via_email").default(false),
+  notifiedViaPush: boolean("notified_via_push").default(false),
+  
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type Alert = typeof alerts.$inferSelect;
+export type InsertAlert = typeof alerts.$inferInsert;
+
+// ============================================================================
+// AGENT RUNS (Tracking of agent execution)
+// ============================================================================
+
+export const agentRuns = mysqlTable("agent_runs", {
+  id: int("id").autoincrement().primaryKey(),
+  
+  runType: mysqlEnum("run_type", [
+    "comment_analysis",   // Analyze new comments
+    "visual_analysis",    // Analyze images
+    "performance_check",  // Check post performance
+    "campaign_analysis",  // Analyze campaign
+    "trend_detection",    // Detect trends
+    "full_scan"          // Complete analysis
+  ]).notNull(),
+  
+  // Scope
+  accountId: int("account_id"),
+  postId: int("post_id"),
+  campaignId: int("campaign_id"),
+  
+  // Execution details
+  status: mysqlEnum("status", ["running", "completed", "failed"]).default("running").notNull(),
+  progress: float("progress").default(0), // 0-100
+  
+  // Results
+  itemsProcessed: int("items_processed").default(0),
+  insightsGenerated: int("insights_generated").default(0),
+  alertsCreated: int("alerts_created").default(0),
+  
+  // Error tracking
+  errorMessage: text("error_message"),
+  
+  // Performance
+  startedAt: timestamp("started_at").defaultNow().notNull(),
+  completedAt: timestamp("completed_at"),
+  durationMs: int("duration_ms"),
+  
+  // Metadata
+  metadata: json("metadata").$type<Record<string, any>>(),
+});
+
+export type AgentRun = typeof agentRuns.$inferSelect;
+export type InsertAgentRun = typeof agentRuns.$inferInsert;
+
+// ============================================================================
+// AGENT SETTINGS (User preferences for agent behavior)
+// ============================================================================
+
+export const agentSettings = mysqlTable("agent_settings", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("user_id").notNull().unique(),
+  
+  // Analysis frequency
+  commentAnalysisEnabled: boolean("comment_analysis_enabled").default(true),
+  commentAnalysisFrequency: int("comment_analysis_frequency").default(60), // minutes
+  
+  visualAnalysisEnabled: boolean("visual_analysis_enabled").default(true),
+  performanceCheckEnabled: boolean("performance_check_enabled").default(true),
+  performanceCheckFrequency: int("performance_check_frequency").default(240), // minutes
+  
+  trendDetectionEnabled: boolean("trend_detection_enabled").default(true),
+  trendDetectionFrequency: int("trend_detection_frequency").default(1440), // daily
+  
+  // Alert preferences
+  alertsEnabled: boolean("alerts_enabled").default(true),
+  emailAlertsEnabled: boolean("email_alerts_enabled").default(true),
+  pushAlertsEnabled: boolean("push_alerts_enabled").default(false),
+  
+  alertTypes: json("alert_types").$type<string[]>(), // Which alert types to receive
+  minimumAlertSeverity: mysqlEnum("minimum_alert_severity", ["info", "warning", "error"]).default("warning"),
+  
+  // Auto-response settings
+  autoResponseEnabled: boolean("auto_response_enabled").default(false),
+  autoResponseToQuestions: boolean("auto_response_to_questions").default(false),
+  autoResponseToPraise: boolean("auto_response_to_praise").default(false),
+  autoResponseToComplaints: boolean("auto_response_to_complaints").default(false),
+  
+  // Thresholds
+  underperformingThreshold: float("underperforming_threshold").default(0.5), // 50% of avg
+  negativeSentimentThreshold: float("negative_sentiment_threshold").default(0.3), // 30% negative
+  toxicCommentThreshold: float("toxic_comment_threshold").default(0.7), // 70% toxic score
+  
+  // Campaign tracking
+  trackCampaignsByDefault: boolean("track_campaigns_by_default").default(true),
+  
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+export type AgentSettings = typeof agentSettings.$inferSelect;
+export type InsertAgentSettings = typeof agentSettings.$inferInsert;
+
+// ============================================================================
+// RELATIONS
+// ============================================================================
+
+export const campaignsRelations = relations(campaigns, ({ many }) => ({
+  posts: many(campaignPosts),
