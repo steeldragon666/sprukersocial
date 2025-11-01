@@ -24,7 +24,8 @@
 
 ## Bugs
 - [x] Posts are failing - Fixed require() statements in scheduler (converted to ES6 imports)
-- [x] All posts still failing - Instagrapi is unreliable, switching to official Instagram Graph API
+- [x] All posts still failing - Instagrapi is unreliable, switched to Playwright
+- [ ] Posts still not working after Playwright migration - investigate scheduler and Playwright integration
 
 ## Migration to Playwright Automation
 - [x] Replace Instagrapi with Playwright MCP browser automation

@@ -1,0 +1,13 @@
+{
+  "query": "SELECT id FROM instagram_accounts LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4FiUfikgDQU4MHP.4fff9066d80d --database U34NkkLJbrpbDaDFLXHvpq --execute SELECT id FROM instagram_accounts LIMIT 1;",
+  "rows": [
+    {
+      "id": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\n1\n",
+  "stderr": "",
+  "execution_time_ms": 1518
+}

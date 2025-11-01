@@ -1,0 +1,28 @@
+{
+  "query": "SELECT id, status, error_message, scheduled_for, created_at FROM posts ORDER BY created_at DESC LIMIT 3;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4FiUfikgDQU4MHP.4fff9066d80d --database U34NkkLJbrpbDaDFLXHvpq --execute SELECT id, status, error_message, scheduled_for, created_at FROM posts ORDER BY created_at DESC LIMIT 3;",
+  "rows": [
+    {
+      "id": "14",
+      "status": "scheduled",
+      "error_message": "NULL",
+      "scheduled_for": "2025-10-30 11:23:37",
+      "created_at": "2025-10-30 11:18:36"
+    },
+    {
+      "id": "13",
+      "status": "scheduled",
+      "error_message": "NULL",
+      "scheduled_for": "2025-10-30 11:23:21",
+      "created_at": "2025-10-30 11:18:20"
+    }
+  ],
+  "messages": [
+    "12\tfailed\tCommand failed: manus-mcp-cli tool call browser_navigate --server playwright --input '{\"url\":\"https://www.instagram.com/accounts/login/\"}'",
+    "/bin/sh: 1: manus-mcp-cli: not found",
+    "\t2025-10-30 11:21:46\t2025-10-30 11:16:46"
+  ],
+  "stdout": "id\tstatus\terror_message\tscheduled_for\tcreated_at\n14\tscheduled\tNULL\t2025-10-30 11:23:37\t2025-10-30 11:18:36\n13\tscheduled\tNULL\t2025-10-30 11:23:21\t2025-10-30 11:18:20\n12\tfailed\tCommand failed: manus-mcp-cli tool call browser_navigate --server playwright --input '{\"url\":\"https://www.instagram.com/accounts/login/\"}'\n/bin/sh: 1: manus-mcp-cli: not found\n\t2025-10-30 11:21:46\t2025-10-30 11:16:46\n",
+  "stderr": "",
+  "execution_time_ms": 1529
+}

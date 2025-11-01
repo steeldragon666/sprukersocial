@@ -1,0 +1,9 @@
+{
+  "query": "\nDROP TABLE IF EXISTS activity_logs;\nDROP TABLE IF EXISTS scheduling_queue;\nDROP TABLE IF EXISTS post_analytics;\nDROP TABLE IF EXISTS content_topics;\nDROP TABLE IF EXISTS brand_kits;\nDROP TABLE IF EXISTS analytics;\nDROP TABLE IF EXISTS followed_accounts;\nDROP TABLE IF EXISTS hashtag_sets;\nDROP TABLE IF EXISTS automation_settings;\nDROP TABLE IF EXISTS posts;\nDROP TABLE IF EXISTS instagram_accounts;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4FiUfikgDQU4MHP.4fff9066d80d --database U34NkkLJbrpbDaDFLXHvpq --execute \nDROP TABLE IF EXISTS activity_logs;\nDROP TABLE IF EXISTS scheduling_queue;\nDROP TABLE IF EXISTS post_analytics;\nDROP TABLE IF EXISTS content_topics;\nDROP TABLE IF EXISTS brand_kits;\nDROP TABLE IF EXISTS analytics;\nDROP TABLE IF EXISTS followed_accounts;\nDROP TABLE IF EXISTS hashtag_sets;\nDROP TABLE IF EXISTS automation_settings;\nDROP TABLE IF EXISTS posts;\nDROP TABLE IF EXISTS instagram_accounts;\n",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 5662
+}

@@ -1,0 +1,16 @@
+{
+  "query": "SELECT id, status, error_message, posted_at FROM posts ORDER BY id DESC LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4FiUfikgDQU4MHP.4fff9066d80d --database U34NkkLJbrpbDaDFLXHvpq --execute SELECT id, status, error_message, posted_at FROM posts ORDER BY id DESC LIMIT 1;",
+  "rows": [
+    {
+      "id": "15",
+      "status": "failed",
+      "error_message": "snapshot.includes is not a function",
+      "posted_at": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tstatus\terror_message\tposted_at\n15\tfailed\tsnapshot.includes is not a function\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 1542
+}

@@ -1,0 +1,8 @@
+{
+  "query": "INSERT INTO posts (content, hashtags, image_url, status, scheduled_for, created_at) VALUES ('Test post: PowerPlant Energy is pioneering sustainable aviation fuels in Australia. Our bamboo-based SAF technology reduces carbon emissions by 80% compared to traditional jet fuel. 🌱✈️', '[\\\"#SustainableAviationFuel\\\", \\\"#SAF\\\", \\\"#CleanEnergy\\\", \\\"#PowerPlantEnergy\\\", \\\"#GreenTech\\\"]', 'https://source.unsplash.com/1080x1080/?renewable-energy', 'scheduled', NOW(), NOW());",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4FiUfikgDQU4MHP.4fff9066d80d --database U34NkkLJbrpbDaDFLXHvpq --execute INSERT INTO posts (content, hashtags, image_url, status, scheduled_for, created_at) VALUES ('Test post: PowerPlant Energy is pioneering sustainable aviation fuels in Australia. Our bamboo-based SAF technology reduces carbon emissions by 80% compared to traditional jet fuel. 🌱✈️', '[\\\"#SustainableAviationFuel\\\", \\\"#SAF\\\", \\\"#CleanEnergy\\\", \\\"#PowerPlantEnergy\\\", \\\"#GreenTech\\\"]', 'https://source.unsplash.com/1080x1080/?renewable-energy', 'scheduled', NOW(), NOW());",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1364 (HY000) at line 1: Field 'account_id' doesn't have a default value"
+  ]
+}

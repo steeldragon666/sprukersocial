@@ -5,18 +5,12 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
-import Dashboard from "./pages/Dashboard";
-import ScheduledPosts from "./pages/ScheduledPosts";
-import FollowerAnalytics from "./pages/FollowerAnalytics";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
       <Route path={"/"} component={Home} />
-      <Route path="/dashboard" component={Dashboard} />
-      <Route path="/scheduled-posts" component={ScheduledPosts} />
-      <Route path="/follower-analytics" component={FollowerAnalytics} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

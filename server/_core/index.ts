@@ -7,7 +7,7 @@ import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
-import '../scheduler'; // Start automation scheduler
+// Scheduler will be re-implemented with Content Studio Pro architecture
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
